@@ -13,15 +13,6 @@ NC='\033[0m'
 
 TMP_FILE=$(mktemp -p "" "rmminstall_XXXXXXXXXX")
 curl -s -L "${SCRIPT_URL}" > ${TMP_FILE}
-NEW_VER=$(grep "^SCRIPT_VERSION" "$TMP_FILE" | awk -F'[="]' '{print $3}')
-
-if [ "${SCRIPT_VERSION}" -ne "${NEW_VER}" ]; then
-    printf >&2 "${YELLOW}Old install script detected, downloading and replacing with the latest version...${NC}\n"
-    wget -q "${SCRIPT_URL}" -O install.sh
-    printf >&2 "${YELLOW}Script updated! Please re-run ./install.sh${NC}\n"
-    rm -f $TMP_FILE
-    exit 1
-fi
 
 rm -f $TMP_FILE
 
