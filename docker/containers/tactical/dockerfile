@@ -1,0 +1,65 @@
+# creates python virtual env
+FROM python:3.9.2-slim AS CREATE_VENV_STAGE
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# # set env variables
+ENV VIRTUAL_ENV /opt/venv
+ENV TACTICAL_DIR /opt/tactical
+ENV TACTICAL_TMP_DIR /tmp/tactical
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH "${VIRTUAL_ENV}/bin:$PATH"
+
+SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
+
+COPY api/tacticalrmm/requirements.txt ${TACTICAL_TMP_DIR}/api/requirements.txt
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libc6-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip install --upgrade pip && \
+    pip install --no-cache-dir setuptools wheel gunicorn && \
+    sed -i '/uWSGI/d' ${TACTICAL_TMP_DIR}/api/requirements.txt && \
+    pip install --no-cache-dir -r ${TACTICAL_TMP_DIR}/api/requirements.txt
+
+
+# runtime image
+FROM python:3.9.2-slim
+
+# set env variables
+ENV VIRTUAL_ENV /opt/venv
+ENV TACTICAL_DIR /opt/tactical
+ENV TACTICAL_TMP_DIR /tmp/tactical
+ENV TACTICAL_READY_FILE ${TACTICAL_DIR}/tmp/tactical.ready
+ENV TACTICAL_USER tactical
+ENV PATH "${VIRTUAL_ENV}/bin:$PATH"
+
+# copy files from repo
+COPY api/tacticalrmm ${TACTICAL_TMP_DIR}/api
+COPY scripts ${TACTICAL_TMP_DIR}/scripts
+
+# copy go install from build stage
+COPY --from=CREATE_VENV_STAGE ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+
+# install deps
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends rsync && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -g 1000 "${TACTICAL_USER}" && \
+    useradd -M -d "${TACTICAL_DIR}" -s /bin/bash -u 1000 -g 1000 "${TACTICAL_USER}"
+
+SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
+
+# copy nats-api file
+COPY natsapi/bin/nats-api /usr/local/bin/
+RUN chmod +x /usr/local/bin/nats-api
+
+# docker init
+COPY docker/containers/tactical/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+WORKDIR ${TACTICAL_DIR}/api
+
+EXPOSE 80 443 8383

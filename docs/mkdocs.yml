@@ -1,0 +1,60 @@
+site_name: "Tactical RMM Documentation"
+nav:
+  - Home: index.md
+  - Sponsor: sponsor.md
+  - RMM Installation:
+      - "Traditional Install": install_server.md
+      - "Docker Install": install_docker.md
+  - Agent Installation: install_agent.md
+  - Updating:
+      - "Updating the RMM": update_server.md
+      - "Updating the RMM (Docker)": update_docker.md
+      - "Updating Agents": update_agents.md
+  - Functionality:
+      - "Custom Fields": functions/custom_fields.md
+      - "Remote Background": functions/remote_bg.md
+      - "Maintenance Mode": functions/maintenance_mode.md
+      - "Alerting": alerting.md
+      - "User Interface Preferences": functions/user_ui.md
+      - "Django Admin": functions/django_admin.md
+  - Backup: backup.md
+  - Restore: restore.md
+  - Troubleshooting: troubleshooting.md
+  - FAQ: faq.md
+  - Management Commands: management_cmds.md
+  - MeshCentral Integration: mesh_integration.md
+  - Contributing: 
+      - "Contributing to Docs": contributing.md
+      - "Contributing using VSCode": contributing_using_vscode.md
+  - License: license.md
+site_description: "A remote monitoring and management tool"
+site_author: "wh1te909"
+
+dev_addr: "0.0.0.0:8005"
+
+# Repository
+repo_name: "wh1te909/tacticalrmm"
+repo_url: "https://github.com/wh1te909/tacticalrmm"
+edit_uri: ""
+
+theme:
+  name: "material"
+  logo: "images/onit.ico"
+  favicon: "images/favicon.ico"
+  language: "en"
+  palette:
+    primary: "white"
+    accent: "indigo"
+extra_css:
+  - stylesheets/extra.css
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: "https://github.com/wh1te909/tacticalrmm"
+markdown_extensions:
+  - pymdownx.inlinehilite
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
